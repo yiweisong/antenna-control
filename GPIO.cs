@@ -85,7 +85,7 @@ namespace AntennaControl
             {
                 //MyOls.WriteIoPortByte(0x2e, 0xcf);
                 b = MyOls.ReadIoPortByte(Convert.ToUInt16(options.offset, 16));
-                b = Convert.ToByte(b >> options.location);
+                b = Convert.ToByte((b<< (7-options.location) & 0xff) >> 7);
             }
             catch (Exception ex)
             {
@@ -114,7 +114,7 @@ namespace AntennaControl
         {
             try
             {
-                byte currentValue = this.ReadGpioVal(options);
+                byte currentValue = MyOls.ReadIoPortByte(Convert.ToUInt16(options.offset, 16));
                 b = Convert.ToByte((currentValue
                     & (~(1 << options.location)))
                     | (b << options.location));
