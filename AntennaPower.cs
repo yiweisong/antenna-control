@@ -4,12 +4,13 @@ namespace AntennaControl
 {
     class AntennaPower
     {
-        private AppSettings _settings = Helper.JsonHelper("appsettings.json");
+        private AppSettings _settings;
         private GPIO _gpio;
         public AntennaPower()
         {
             _gpio = new GPIO();
             _gpio.Initialize();
+            _settings = Helper.JsonHelper("appsettings.json");
         }
 
         public bool Open()
