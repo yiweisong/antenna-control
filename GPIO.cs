@@ -45,15 +45,15 @@ namespace AntennaControl
         public int SuperIoInw(byte ldn, byte data)
         {
             int val;
-            MyOls.WriteIoPortByte(0x2e, ldn);
+            MyOls.WriteIoPortByte(0x2e, 0x07);
             MyOls.WriteIoPortByte(0x2f, ldn);
 
-            MyOls.WriteIoPortByte(0x2e, data++);
-            val = MyOls.ReadIoPortByte(0x2f) << 8;
-            //Console.WriteLine("SuperIo_Inw  val1:" + Convert.ToString(val, 16));
             MyOls.WriteIoPortByte(0x2e, data);
+            val = MyOls.ReadIoPortByte(0x2f)<<8;
+            //Console.WriteLine("SuperIo_Inw  val1:" + Convert.ToString(val, 16));
+            MyOls.WriteIoPortByte(0x2e, ++data);
             val |= MyOls.ReadIoPortByte(0x2f);
-            ///Console.WriteLine("SuperIo_Inw  val2:" + Convert.ToString(val, 16));
+            //Console.WriteLine("SuperIo_Inw  val2:" + Convert.ToString(val, 16));
             return val;
         }
 

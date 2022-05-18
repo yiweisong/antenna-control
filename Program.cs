@@ -9,7 +9,7 @@ namespace AntennaControl
 
         static void Main(string[] args)
         {
-            //AntennaPower powerControl = new AntennaPower();
+            AntennaPower powerControl = new AntennaPower();
 
             string action = string.Empty;
 
@@ -26,15 +26,21 @@ namespace AntennaControl
 
             if (string.Equals(action, "open"))
             {
-                bool result = true; //powerControl.Open();
+                bool result = powerControl.Open();
                 Console.WriteLine("{0}-{1}", action, result ? SUCCESS : FAIL);
                 return;
             }
 
             if (string.Equals(action, "close"))
             {
-                bool result = true; //powerControl.Close();
+                bool result = powerControl.Close();
                 Console.WriteLine("{0}-{1}", action, result ? SUCCESS : FAIL);
+                return;
+            }
+
+            if (string.Equals(action, "info"))
+            {
+                powerControl.Status();
                 return;
             }
 

@@ -58,8 +58,13 @@ namespace AntennaControl
             return true;
         }
 
-        bool Status()
+        public bool Status()
         {
+            ushort baseAddress = (ushort)_gpio.SuperIoInw(0x07, 0x20);
+            Console.WriteLine("Chip Name: {0}", Convert.ToString(baseAddress, 16));
+
+            baseAddress = (ushort)_gpio.SuperIoInw(0x07, 0x62);
+            Console.WriteLine("SIO Base: {0}", Convert.ToString(baseAddress, 16));
             return true;
         }
 
