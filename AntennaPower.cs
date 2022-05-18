@@ -17,7 +17,9 @@ namespace AntennaControl
         {
             // gpio set io
             // check the value from specified GPO
-            byte value = _gpio.ReadGpioVal(_settings.GPO);
+            ushort baseAddress = (ushort)_gpio.SuperIoInw(0x07, 0x62);
+
+            byte value = _gpio.ReadGpioVal(baseAddress, _settings.GPO);
 
             // case 1, no more action
             if (value == 1)
@@ -28,7 +30,7 @@ namespace AntennaControl
             // case 0, write 1 to the GPO
             if (value == 0)
             {
-                _gpio.SetGpioVal(_settings.GPO, 1);
+                _gpio.SetGpioVal(baseAddress, 1, _settings.GPO);
             }
 
             return true;
@@ -38,7 +40,9 @@ namespace AntennaControl
         {
             // gpio set io
             // check the value from specified GPO
-            byte value = _gpio.ReadGpioVal(_settings.GPO);
+            ushort baseAddress = (ushort)_gpio.SuperIoInw(0x07, 0x62);
+
+            byte value = _gpio.ReadGpioVal(baseAddress, _settings.GPO);
 
             // case 0, no more action
             if (value == 0)
@@ -49,7 +53,7 @@ namespace AntennaControl
             // case 1, write 1 to the GPO
             if (value == 1)
             {
-                _gpio.SetGpioVal(_settings.GPO, 0);
+                _gpio.SetGpioVal(baseAddress, 0, _settings.GPO);
             }
             return true;
         }

@@ -42,22 +42,25 @@ namespace AntennaControl
             Console.WriteLine("init gpio end ...");
         }
 
-        public int SuperIoInw(byte data)
+        public int SuperIoInw(byte ldn, byte data)
         {
             int val;
+            MyOls.WriteIoPortByte(0x2e, ldn);
+            MyOls.WriteIoPortByte(0x2f, ldn);
+
             MyOls.WriteIoPortByte(0x2e, data++);
             val = MyOls.ReadIoPortByte(0x2f) << 8;
-            Console.WriteLine("SuperIo_Inw  val1:" + Convert.ToString(val, 16));
+            //Console.WriteLine("SuperIo_Inw  val1:" + Convert.ToString(val, 16));
             MyOls.WriteIoPortByte(0x2e, data);
             val |= MyOls.ReadIoPortByte(0x2f);
-            Console.WriteLine("SuperIo_Inw  val2:" + Convert.ToString(val, 16));
+            ///Console.WriteLine("SuperIo_Inw  val2:" + Convert.ToString(val, 16));
             return val;
         }
 
         public string GetChipName()
         {
             ushort chip_type;
-            chip_type = (ushort)SuperIoInw(0x20);
+            chip_type = (ushort)SuperIoInw(0x07, 0x20);
             Console.WriteLine("chip type :" + Convert.ToString(chip_type, 16));
             return "IT" + Convert.ToString(chip_type, 16);
         }
@@ -78,14 +81,15 @@ namespace AntennaControl
             return b;
         }
 
-        public byte ReadGpioVal(GPIOOptions options)
+        public byte ReadGpioVal(ushort baseAddress, GPIOOptions options)
         {
             byte b = 0;
             try
             {
                 //MyOls.WriteIoPortByte(0x2e, 0xcf);
-                b = MyOls.ReadIoPortByte(Convert.ToUInt16(options.offset, 16));
-                b = Convert.ToByte((b<< (7-options.location) & 0xff) >> 7);
+                baseAddress += Convert.ToUInt16(options.offset, 16);
+                b = MyOls.ReadIoPortByte(baseAddress);
+                b = Convert.ToByte((b << (7 - options.location) & 0xff) >> 7);
             }
             catch (Exception ex)
             {
@@ -110,15 +114,16 @@ namespace AntennaControl
 
         }
 
-        public void SetGpioVal(GPIOOptions options, byte b)
+        public void SetGpioVal(ushort baseAddress, byte b, GPIOOptions options)
         {
             try
             {
-                byte currentValue = MyOls.ReadIoPortByte(Convert.ToUInt16(options.offset, 16));
+                baseAddress += Convert.ToUInt16(options.offset, 16);
+                byte currentValue = MyOls.ReadIoPortByte(baseAddress);
                 b = Convert.ToByte((currentValue
                     & (~(1 << options.location)))
                     | (b << options.location));
-                MyOls.WriteIoPortByte(Convert.ToUInt16(options.offset, 16), b);
+                MyOls.WriteIoPortByte(baseAddress, b);
             }
             catch (Exception ex)
             {
