@@ -11,7 +11,6 @@ namespace AntennaControl
             _gpio = new GPIO();
             _gpio.Initialize();
             _settings = Helper.JsonHelper("appsettings.json");
-            System.Console.WriteLine(_settings.baseAddress);
         }
 
         public bool Open()
