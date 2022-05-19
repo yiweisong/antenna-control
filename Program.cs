@@ -20,31 +20,40 @@ namespace AntennaControl
 
             if (string.IsNullOrEmpty(action))
             {
-                Console.WriteLine(FAIL);
+                Console.Write(FAIL);
+                return;
+            }
+
+            if (string.Equals(action, "info"))
+            {
+                powerControl.Info();
                 return;
             }
 
             if (string.Equals(action, "open"))
             {
                 bool result = powerControl.Open();
-                Console.WriteLine("{0}-{1}", action, result ? SUCCESS : FAIL);
+                Console.Write("{0}-{1}", action, result ? SUCCESS : FAIL);
                 return;
             }
 
             if (string.Equals(action, "close"))
             {
                 bool result = powerControl.Close();
-                Console.WriteLine("{0}-{1}", action, result ? SUCCESS : FAIL);
+                Console.Write("{0}-{1}", action, result ? SUCCESS : FAIL);
                 return;
             }
 
-            if (string.Equals(action, "info"))
+            if (string.Equals(action, "status"))
             {
-                powerControl.Status();
+                // 0: power off
+                // 1: power on
+                byte result = powerControl.Status();
+                Console.Write("{0}-{1}", action, result);
                 return;
             }
 
-            Console.WriteLine("No support action:{0}", action);
+            Console.Write("No support action:{0}", action);
         }
     }
 }

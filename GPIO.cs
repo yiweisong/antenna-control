@@ -5,7 +5,6 @@ namespace AntennaControl
     class GPIO
     {
         private static OpenLibSys.Ols MyOls;
-        public static string gpbase = "a07";
 
         public bool Initialize()
         {
@@ -65,28 +64,11 @@ namespace AntennaControl
             return "IT" + Convert.ToString(chip_type, 16);
         }
 
-        public byte ReadGpioMode()
-        {
-            byte b = 0;
-            try
-            {
-                MyOls.WriteIoPortByte(0x2e, 0xcf);
-                b = MyOls.ReadIoPortByte(0x2f);
-            }
-            catch (Exception ex)
-            {
-                // System.Windows.MessageBox.Show("An error occured:\n" + ex.Message);
-                Console.WriteLine("An error occured:\n" + ex.Message);
-            }
-            return b;
-        }
-
         public byte ReadGpioVal(ushort baseAddress, GPIOOptions options)
         {
             byte b = 0;
             try
             {
-                //MyOls.WriteIoPortByte(0x2e, 0xcf);
                 baseAddress += Convert.ToUInt16(options.offset, 16);
                 b = MyOls.ReadIoPortByte(baseAddress);
                 b = Convert.ToByte((b << (7 - options.location) & 0xff) >> 7);
@@ -97,21 +79,6 @@ namespace AntennaControl
                 Console.Error.WriteLine("An error occured:\n" + ex.Message);
             }
             return b;
-        }
-
-        public void SetGpioMode(byte b)
-        {
-            try
-            {
-                MyOls.WriteIoPortByte(0x2e, 0xcf);
-                MyOls.WriteIoPortByte(0x2f, b);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occured:\n" + ex.Message);
-                //System.Windows.MessageBox.Show("An error occured:\n" + ex.Message);
-            }
-
         }
 
         public void SetGpioVal(ushort baseAddress, byte b, GPIOOptions options)

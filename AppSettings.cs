@@ -11,9 +11,10 @@ namespace AntennaControl
         public string offset { get; set; }
         public int location { get; set; }
     }
-    
+
     public class AppSettings
     {
+        public ushort baseAddress { get; set; }
         public GPIOOptions GPO { get; set; }
         public GPIOOptions GPI { get; set; }
     }
