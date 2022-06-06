@@ -6,68 +6,86 @@ namespace AntennaControl
     {
         private AppSettings _settings;
         private GPIO _gpio;
+        private ScriptManager _scriptManager;
+
         public AntennaPower()
         {
-            _gpio = new GPIO();
-            _gpio.Initialize();
             _settings = Helper.JsonHelper("appsettings.json");
+
+            _gpio = new GPIO(_settings);
+            _gpio.Initialize();
+
+            _scriptManager = new ScriptManager(_gpio);
         }
 
         public bool Open()
         {
-            // gpio set io
-            // check the value from specified GPO
-            // (ushort)_gpio.SuperIoInw(0x07, 0x62);
-            byte value = _gpio.ReadGpioVal(_settings.baseAddress, _settings.GPO);
-
-            // case 1, no more action
-            if (value == 1)
+            string[] openScripts = this._settings.actions.open;
+            try
             {
-                return true;
+                this._scriptManager.Run(openScripts);
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
 
-            // case 0, write 1 to the GPO
-            if (value == 0)
+            string[] statusScripts = this._settings.actions.status;
+            try
             {
-                _gpio.SetGpioVal(_settings.baseAddress, 1, _settings.GPO);
+                byte status = this._scriptManager.Run(statusScripts).ToByte();
+                return status == 1;
             }
-
-            return true;
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public bool Close()
         {
-            // gpio set io
-            // check the value from specified GPO
-            // (ushort)_gpio.SuperIoInw(0x07, 0x62);
-            byte value = _gpio.ReadGpioVal(_settings.baseAddress, _settings.GPO);
-
-            // case 0, no more action
-            if (value == 0)
+            string[] closeScripts = this._settings.actions.close;
+            try
             {
-                return true;
+                this._scriptManager.Run(closeScripts);
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
 
-            // case 1, write 1 to the GPO
-            if (value == 1)
+            string[] statusScripts = this._settings.actions.status;
+            try
             {
-                _gpio.SetGpioVal(_settings.baseAddress, 0, _settings.GPO);
+                byte status = this._scriptManager.Run(statusScripts).ToByte();
+                return status == 0;
             }
-            return true;
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public byte Status()
         {
-            return _gpio.ReadGpioVal(_settings.baseAddress, _settings.GPO);
+            string[] gpioScripts = this._settings.actions.status;
+            try
+            {
+                return this._scriptManager.Run(gpioScripts).ToByte();
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
         }
 
         public bool Info()
         {
-            ushort baseAddress = (ushort)_gpio.SuperIoInw(0x07, 0x20);
-            Console.WriteLine("Chip Name: {0}", Convert.ToString(baseAddress, 16));
-            Console.WriteLine("Base Address: {0}", _settings.baseAddress);
-            Console.WriteLine("GPO Power Address: {0}", _settings.baseAddress + Convert.ToUInt16(_settings.GPO.offset, 16));
-            Console.WriteLine("GPO Power Bit: {0}", _settings.GPO.location);
+            // ushort baseAddress = (ushort)_gpio.SuperIoInw(0x07, 0x20);
+            // Console.WriteLine("Chip Name: {0}", Convert.ToString(baseAddress, 16));
+            // Console.WriteLine("Base Address: {0}", _settings.baseAddress);
+            // Console.WriteLine("GPO Power Address: {0}", _settings.baseAddress + Convert.ToUInt16(_settings.GPO.offset, 16));
+            // Console.WriteLine("GPO Power Bit: {0}", _settings.GPO.location);
             return true;
         }
 

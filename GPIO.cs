@@ -1,102 +1,1 @@
-using System;
-
-namespace AntennaControl
-{
-    class GPIO
-    {
-        private static OpenLibSys.Ols MyOls;
-
-        public bool Initialize()
-        {
-            MyOls = new OpenLibSys.Ols();
-            return MyOls.GetStatus() == (uint)OpenLibSys.Ols.Status.NO_ERROR;
-        }
-
-        public void ExitSuperIo()
-        {
-            if (MyOls != null)
-            {
-                MyOls.WriteIoPortByte(0x2e, 0x02);
-                MyOls.WriteIoPortByte(0x2f, 0x02);
-            }
-
-        }
-
-        public void InitSuperIO()
-        {
-            MyOls.WriteIoPortByte(0x2e, 0x87);
-            MyOls.WriteIoPortByte(0x2e, 0x01);
-            MyOls.WriteIoPortByte(0x2e, 0x55);
-            MyOls.WriteIoPortByte(0x2e, 0x55);
-        }
-
-        public void InitGpioReg()
-        {
-            //select logic device
-            MyOls.WriteIoPortByte(0x2e, 0x07);
-            MyOls.WriteIoPortByte(0x2f, 0x07);
-            //Speecial Function Selection Register3(Index=2Ch, Default=89h)
-            MyOls.WriteIoPortByte(0x2e, 0x2c);
-            MyOls.WriteIoPortByte(0x2f, 0x89);
-            Console.WriteLine("init gpio end ...");
-        }
-
-        public int SuperIoInw(byte ldn, byte data)
-        {
-            int val;
-            MyOls.WriteIoPortByte(0x2e, 0x07);
-            MyOls.WriteIoPortByte(0x2f, ldn);
-
-            MyOls.WriteIoPortByte(0x2e, data);
-            val = MyOls.ReadIoPortByte(0x2f)<<8;
-            //Console.WriteLine("SuperIo_Inw  val1:" + Convert.ToString(val, 16));
-            MyOls.WriteIoPortByte(0x2e, ++data);
-            val |= MyOls.ReadIoPortByte(0x2f);
-            //Console.WriteLine("SuperIo_Inw  val2:" + Convert.ToString(val, 16));
-            return val;
-        }
-
-        public string GetChipName()
-        {
-            ushort chip_type;
-            chip_type = (ushort)SuperIoInw(0x07, 0x20);
-            Console.WriteLine("chip type :" + Convert.ToString(chip_type, 16));
-            return "IT" + Convert.ToString(chip_type, 16);
-        }
-
-        public byte ReadGpioVal(ushort baseAddress, GPIOOptions options)
-        {
-            byte b = 0;
-            try
-            {
-                baseAddress += Convert.ToUInt16(options.offset, 16);
-                b = MyOls.ReadIoPortByte(baseAddress);
-                b = Convert.ToByte((b << (7 - options.location) & 0xff) >> 7);
-            }
-            catch (Exception ex)
-            {
-                // System.Windows.MessageBox.Show("An error occured:\n" + ex.Message);
-                Console.Error.WriteLine("An error occured:\n" + ex.Message);
-            }
-            return b;
-        }
-
-        public void SetGpioVal(ushort baseAddress, byte b, GPIOOptions options)
-        {
-            try
-            {
-                baseAddress += Convert.ToUInt16(options.offset, 16);
-                byte currentValue = MyOls.ReadIoPortByte(baseAddress);
-                b = Convert.ToByte((currentValue
-                    & (~(1 << options.location)))
-                    | (b << options.location));
-                MyOls.WriteIoPortByte(baseAddress, b);
-            }
-            catch (Exception ex)
-            {
-                //System.Windows.MessageBox.Show("An error occured:\n" + ex.Message);
-                Console.Error.WriteLine("An error occured:\n" + ex.Message);
-            }
-        }
-    }
-}
+using System;using System.Linq;namespace AntennaControl{    class GPIO    {        private AppSettings _settings;        private static OpenLibSys.Ols MyOls;        public GPIO(AppSettings settings)        {            this._settings = settings;        }        public bool Initialize()        {            MyOls = new OpenLibSys.Ols();            return MyOls.GetStatus() == (uint)OpenLibSys.Ols.Status.NO_ERROR;        }        public byte Read(string ioType, string key)        {            if (ioType == "gpo")            {                GPIOOptions options = this._settings.GPO.Where(s => s.key == key).FirstOrDefault();                return this.ReadGpioVal(this._settings.baseAddress, options);            }            if (ioType == "gpi")            {                GPIOOptions options = this._settings.GPI.Where(s => s.key == key).FirstOrDefault();                return this.ReadGpioVal(this._settings.baseAddress, options);            }            throw new Exception("Undefined ioType:" + ioType);        }        public bool Write(string ioType, string key, byte b)        {            if (ioType == "gpo")            {                GPIOOptions options = this._settings.GPO.Where(s => s.key == key).FirstOrDefault();                return this.SetGpioVal(this._settings.baseAddress, b, options);            }            if (ioType == "gpi")            {                GPIOOptions options = this._settings.GPI.Where(s => s.key == key).FirstOrDefault();                return this.SetGpioVal(this._settings.baseAddress, b, options);            }            throw new Exception("Undefined ioType:" + ioType);        }        private byte ReadGpioVal(ushort baseAddress, GPIOOptions options)        {            byte b = 0;            try            {                baseAddress += Convert.ToUInt16(options.offset, 16);                b = MyOls.ReadIoPortByte(baseAddress);                b = Convert.ToByte((b << (7 - options.location) & 0xff) >> 7);            }            catch (Exception ex)            {                // System.Windows.MessageBox.Show("An error occured:\n" + ex.Message);                Console.Error.WriteLine("An error occured:\n" + ex.Message);            }            return b;        }        private bool SetGpioVal(ushort baseAddress, byte b, GPIOOptions options)        {            try            {                baseAddress += Convert.ToUInt16(options.offset, 16);                byte currentValue = MyOls.ReadIoPortByte(baseAddress);                b = Convert.ToByte((currentValue                    & (~(1 << options.location)))                    | (b << options.location));                MyOls.WriteIoPortByte(baseAddress, b);                return true;            }            catch (Exception ex)            {                //System.Windows.MessageBox.Show("An error occured:\n" + ex.Message);                Console.Error.WriteLine("An error occured:\n" + ex.Message);                return false;            }        }    }}

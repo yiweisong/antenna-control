@@ -8,15 +8,24 @@ namespace AntennaControl
 {
     public class GPIOOptions
     {
+        public string key {get;set;}
         public string offset { get; set; }
         public int location { get; set; }
+    }
+
+    public class ActionDefines
+    {
+        public string[] open { get;set; }
+        public string[] close { get;set; }
+        public string[] status { get;set; }
     }
 
     public class AppSettings
     {
         public ushort baseAddress { get; set; }
-        public GPIOOptions GPO { get; set; }
-        public GPIOOptions GPI { get; set; }
+        public GPIOOptions[] GPO { get; set; }
+        public GPIOOptions[] GPI { get; set; }
+        public ActionDefines actions { get; set; }
     }
 
     public class Helper
