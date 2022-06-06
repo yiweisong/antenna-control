@@ -20,20 +20,21 @@ namespace AntennaControl
 
         public bool Open()
         {
-            string[] openScripts = this._settings.actions.open;
+            string[] openScripts = _settings.actions.open;
             try
             {
-                this._scriptManager.Run(openScripts);
+                _scriptManager.Run(openScripts);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 return false;
             }
 
-            string[] statusScripts = this._settings.actions.status;
+            string[] statusScripts = _settings.actions.status;
             try
             {
-                byte status = this._scriptManager.Run(statusScripts).ToByte();
+                byte status = _scriptManager.Run(statusScripts).ToByte();
                 return status == 1;
             }
             catch (Exception ex)
@@ -44,20 +45,20 @@ namespace AntennaControl
 
         public bool Close()
         {
-            string[] closeScripts = this._settings.actions.close;
+            string[] closeScripts = _settings.actions.close;
             try
             {
-                this._scriptManager.Run(closeScripts);
+                _scriptManager.Run(closeScripts);
             }
             catch (Exception ex)
             {
                 return false;
             }
 
-            string[] statusScripts = this._settings.actions.status;
+            string[] statusScripts = _settings.actions.status;
             try
             {
-                byte status = this._scriptManager.Run(statusScripts).ToByte();
+                byte status = _scriptManager.Run(statusScripts).ToByte();
                 return status == 0;
             }
             catch (Exception ex)
@@ -68,10 +69,10 @@ namespace AntennaControl
 
         public byte Status()
         {
-            string[] gpioScripts = this._settings.actions.status;
+            string[] gpioScripts = _settings.actions.status;
             try
             {
-                return this._scriptManager.Run(gpioScripts).ToByte();
+                return _scriptManager.Run(gpioScripts).ToByte();
             }
             catch (Exception ex)
             {

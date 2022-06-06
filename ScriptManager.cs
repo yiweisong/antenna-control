@@ -88,7 +88,7 @@ namespace AntennaControl
 
         public ScriptResult Run(string[] scripts)
         {
-            ScriptResult lastResult=null;
+            ScriptResult lastResult = null;
 
             foreach (string statement in scripts)
             {
@@ -99,7 +99,7 @@ namespace AntennaControl
                 }
             }
 
-            if (lastResult!=null)
+            if (lastResult == null)
             {
                 throw new Exception("Please configure the script");
             }
